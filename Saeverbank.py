@@ -130,8 +130,9 @@ def ElecCostForecast(input_str_date):
 	input_date = datetime.strptime(input_str_date, '%Y-%m-%d')
 	day_count = (input_date - last_date).days
 	input_week = day_count // 7
-	input_day = day_count % 2
-
+	input_week = input_week
+	input_day = day_count % 7
+	input_day = input_day
 	#check score by input day in json line (1=sun,2=mon,3=tue,4=wed,5=thr,6=fri,7=sat)
 	n_input = 7 * input_week
 	score, scores = evaluate_model(train, test, n_input)
@@ -140,12 +141,12 @@ def ElecCostForecast(input_str_date):
 	summarize_scores('lstm', score, scores)
 
 	##plot scores (not use on api please comment this line ###################
-	days = ['sun', 'mon', 'tue', 'wed', 'thr', 'fri', 'sat']
+	#days = ['sun', 'mon', 'tue', 'wed', 'thr', 'fri', 'sat']
 	#pyplot.plot(days, scores, marker='o', label='lstm')
 	#pyplot.show()
 	##########################################################################
 
-	output_cost = scores[input_day - 1]
-	print(output_cost, input_day)
+	output_cost = scores[input_day]
 	return output_cost
+
 
