@@ -146,7 +146,5 @@ def ElecCostForecast(input_str_date):
 	#pyplot.show()
 	##########################################################################
 
-	output_cost = scores[input_day]
+	output_cost = scores
 	return output_cost
-
-
