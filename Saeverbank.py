@@ -10,6 +10,9 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Flatten
 from keras.layers import LSTM
+from os import path
+import pickle
+model_name = 'saeverbank_model'
 
 # split a univariate dataset into train/test sets
 def split_dataset(data):
@@ -80,6 +83,10 @@ def build_model(train, n_input):
 	model.compile(loss='mse', optimizer='adam')
 	# fit network
 	model.fit(train_x, train_y, epochs=epochs, batch_size=batch_size, verbose=verbose)
+	model_week = str(n_input)
+	model_name = 'saeverbank_model'
+	model_name = model_name + model_week + '.sav'
+	pickle.dump(model, open(model_name, 'wb'))
 	return model
 
 # make a forecast
@@ -100,7 +107,18 @@ def forecast(model, history, n_input):
 # evaluate a single model
 def evaluate_model(train, test, n_input):
 	# fit model
-	model = build_model(train, n_input)
+	# Check Pickle File
+	model_week = str(n_input)
+	model_name = 'saeverbank_model'
+	model_name = model_name + model_week + '.sav'
+	model_exist_check = path.exists(model_name)
+	if model_exist_check == True :
+		print('Model exists')
+		model = pickle.load(open(model_name, 'rb'))
+	if model_exist_check == False :
+		model = build_model(train, n_input)
+	#model = build_model(train, n_input)
+	#model = pickle.load(open(model_name, 'rb'))
 	# history is a list of weekly data
 	history = [x for x in train]
 	# walk-forward validation over each week
@@ -126,13 +144,11 @@ def ElecCostForecast(input_str_date):
 
 	# evaluate model and get scores
 	#check score by input week in json line
-	last_date = datetime(2010, 11, 20)
+	last_date = datetime(2010, 11, 26)
 	input_date = datetime.strptime(input_str_date, '%Y-%m-%d')
 	day_count = (input_date - last_date).days
 	input_week = day_count // 7
-	input_week = input_week
 	input_day = day_count % 7
-	input_day = input_day
 	#check score by input day in json line (1=sun,2=mon,3=tue,4=wed,5=thr,6=fri,7=sat)
 	n_input = 7 * input_week
 	score, scores = evaluate_model(train, test, n_input)
